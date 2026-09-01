@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.filename }}{% endblock %}
+{% block content %}
+<p class="muted"><a href="/">← All documents</a></p>
+<h1>{{ doc.filename }}</h1>
+<p class="muted">{{ doc.clauses|length }} clauses{% if doc.page_count %} · {{ doc.page_count }} pages{% endif %}</p>
+
+{% if job_id %}
+<div id="job" class="card" style="margin-top:20px" hx-get="/jobs/{{ job_id }}" hx-trigger="load, every 3s" hx-swap="outerHTML">
+  Starting review…
+</div>
+{% endif %}
+
+{% if reviews %}
+<h2>Reviews</h2>
+<div class="card">
+<table>
+  <tr><th>Grade</th><th>Perspective</th><th>Date</th><th></th></tr>
+  {% for r in reviews %}
+  <tr>
+    <td><b>{{ r.letter }}</b> · {{ r.grade }}/100</td>
+    <td>{{ r.perspective }}</td>
+    <td class="muted">{{ r.created_at.strftime('%d %b %Y %H:%M') }}</td>
+    <td><a class="btn ghost" href="/reviews/{{ r.id }}">Open</a></td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endif %}
+
+<h2>Ask the document</h2>
+<div class="card">
+  {% if principal.is_authenticated %}
+  <div id="turns">
+    {% for m in messages %}
+    <div class="turn"><b>{{ 'You' if m.role == 'user' else 'Jessica' }}</b>{{ m.content }}</div>
+    {% endfor %}
+  </div>
+  <form hx-post="/documents/{{ doc.id }}/ask" hx-target="#turns" hx-swap="beforeend" hx-on::after-request="this.reset()" style="margin-top:14px">
+    <div class="row">
+      <input type="text" name="question" placeholder="Can I terminate early? What happens to my equity if I leave?" required style="flex:1">
+      <button class="btn" type="submit">Ask <span class="htmx-indicator">…</span></button>
+    </div>
+  </form>
+  {% else %}
+  <p class="muted">Sign in to ask questions about this document. <a href="/auth/login">Sign in</a></p>
+  {% endif %}
+</div>
+
+<h2>Clauses</h2>
+<div class="card">
+<table>
+  {% for c in doc.clauses %}
+  <tr><td class="muted" style="width:70px">{{ c.ref }}</td><td>{% if c.heading %}<b>{{ c.heading }}</b><br>{% endif %}{{ c.text }}</td></tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}
