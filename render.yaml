@@ -1,0 +1,18 @@
+# Render Blueprint — New + → Blueprint → pick this repo → Apply.
+services:
+  - type: web
+    name: fdai
+    runtime: docker
+    region: singapore
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: APP_MODULE
+        value: demo:app
+      - key: ANTHROPIC_API_KEY
+        sync: false          # you will be prompted to paste it
+      - key: CLAUDE_MODEL_REVIEW
+        value: claude-sonnet-5
+      - key: CLAUDE_MODEL_ASK
+        value: claude-sonnet-5
